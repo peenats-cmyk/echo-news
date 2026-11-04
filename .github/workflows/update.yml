@@ -1,8 +1,8 @@
-name: Update news
+name: Update funds
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "15 */3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -13,16 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch news
-        run: python3 fetch_news.py
+      - name: Fetch funds
+        run: python3 fetch_funds.py
       - name: Commit if changed
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add news.json
+          git add funds.json
           if git diff --cached --quiet; then
             echo "no change"
           else
-            git commit -m "update news"
+            git commit -m "update funds"
             git push
           fi
