@@ -14,13 +14,14 @@ FUNDS = [
     ("楽天SOX", "9I315241"),
 ]
 URL = "https://apl.wealthadvisor.jp/webasp/yahoo-fund/fund/snp/snp_%s.html"
+RTN_URL = "https://apl.wealthadvisor.jp/webasp/yahoo-fund/fund/rtn/rtn_%s.html"
 JST = timezone(timedelta(hours=9))
 OUT = "funds.json"
 KEEP_DAYS = 150
 
 
-def fetch(code):
-    req = urllib.request.Request(URL % code, headers={"User-Agent": "Mozilla/5.0 (echo-news)"})
+def fetch(code, url=URL):
+    req = urllib.request.Request(url % code, headers={"User-Agent": "Mozilla/5.0 (echo-news)"})
     with urllib.request.urlopen(req, timeout=30) as r:
         return r.read().decode("shift_jis", errors="replace")
 
@@ -41,6 +42,17 @@ def parse(html):
     if t.group(2) == "↓":
         diff = -diff
     return d, nav, diff
+
+
+def parse_yoy(html):
+    """トータルリターン(1年)と評価基準日(月末)を返す。"""
+    m = re.search(r"評価基準日\s*(\d{4})年(\d{1,2})月(\d{1,2})日", html)
+    r = re.search(r"トータルリターン</td>((?:\s*<td>.*?</td>){6})", html, re.S)
+    if not m or not r:
+        raise ValueError("1年リターンが見つからない")
+    cells = [re.sub(r"<[^>]+>", "", c).strip() for c in re.findall(r"<td>(.*?)</td>", r.group(1), re.S)]
+    v = float(cells[3].replace("%", ""))
+    return v, "%d/%d" % (int(m.group(2)), int(m.group(3)))
 
 
 def month_ago(d):
@@ -95,8 +107,13 @@ def main():
             del h[k]
         pct = round(diff / (nav - diff) * 100, 2) if nav != diff else 0.0
         m, ref = mom(h, d)
+        yoy, yref = None, None
+        try:
+            yoy, yref = parse_yoy(fetch(code, RTN_URL))
+        except Exception as e:
+            print("yoy skip", name, e, file=sys.stderr)
         items.append({"name": name, "code": code, "date": "%d/%d" % (d.month, d.day),
-                      "nav": nav, "diff": diff, "pct": pct, "mom": m, "momRef": ref})
+                      "nav": nav, "diff": diff, "pct": pct, "mom": m, "momRef": ref, "yoy": yoy, "yoyRef": yref})
     if not items:
         print("no items", file=sys.stderr)
         sys.exit(1)
