@@ -1,38 +1,126 @@
 {
- "updated": "2026-11-05 00:18",
+ "updated": "2026-11-05 00:23",
  "source": "Yahoo!ニュース",
  "items": [
   {
+   "cat": "主要",
    "title": "米中間選挙 日本政府は動向注視",
-   "link": "https://news.yahoo.co.jp/pickup/6601362?source=rss"
+   "link": "https://news.yahoo.co.jp/pickup/6601362?source=rss",
+   "time": "23:20"
   },
   {
+   "cat": "主要",
    "title": "リニア工事費 再び増額へ検討",
-   "link": "https://news.yahoo.co.jp/pickup/6601365?source=rss"
+   "link": "https://news.yahoo.co.jp/pickup/6601365?source=rss",
+   "time": "23:54"
   },
   {
+   "cat": "主要",
    "title": "関東 5日は滝のような雨降る所も",
-   "link": "https://news.yahoo.co.jp/pickup/6601351?source=rss"
+   "link": "https://news.yahoo.co.jp/pickup/6601351?source=rss",
+   "time": "22:03"
   },
   {
+   "cat": "主要",
    "title": "児童婚増えるガザ 壮絶性暴力訴え",
-   "link": "https://news.yahoo.co.jp/pickup/6601344?source=rss"
+   "link": "https://news.yahoo.co.jp/pickup/6601344?source=rss",
+   "time": "20:58"
   },
   {
-   "title": "e-Taxに不審な通信 緊急メンテ",
-   "link": "https://news.yahoo.co.jp/pickup/6601361?source=rss"
+   "cat": "国内",
+   "title": "高市首相 COP31欠席する見通し",
+   "link": "https://news.yahoo.co.jp/pickup/6601349?source=rss",
+   "time": "21:58"
   },
   {
-   "title": "竜王戦でカメムシ出没 僧侶が捕獲",
-   "link": "https://news.yahoo.co.jp/pickup/6601363?source=rss"
+   "cat": "国際",
+   "title": "米大統領 民主党に「おめでとう」",
+   "link": "https://news.yahoo.co.jp/pickup/6601327?source=rss",
+   "time": "18:09"
   },
   {
-   "title": "塩貝健人 因縁ブラジル戦で招集外",
-   "link": "https://news.yahoo.co.jp/pickup/6601360?source=rss"
+   "cat": "国際",
+   "title": "米大統領 敗因巡りイラン攻撃言及",
+   "link": "https://news.yahoo.co.jp/pickup/6601315?source=rss",
+   "time": "17:00"
   },
   {
+   "cat": "国際",
+   "title": "米民主党が両院で過半数確実 報道",
+   "link": "https://news.yahoo.co.jp/pickup/6601295?source=rss",
+   "time": "13:52"
+  },
+  {
+   "cat": "経済",
+   "title": "米中間選挙 日本経済への影響は",
+   "link": "https://news.yahoo.co.jp/pickup/6601343?source=rss",
+   "time": "20:49"
+  },
+  {
+   "cat": "経済",
+   "title": "金融庁 ソニーFGに立ち入り検査",
+   "link": "https://news.yahoo.co.jp/pickup/6601346?source=rss",
+   "time": "21:13"
+  },
+  {
+   "cat": "エンタメ",
+   "title": "劇作家・演出家 芥正彦さん死去",
+   "link": "https://news.yahoo.co.jp/pickup/6601356?source=rss",
+   "time": "22:38"
+  },
+  {
+   "cat": "エンタメ",
+   "title": "忽滑谷アナ 夫の海外赴任に帯同",
+   "link": "https://news.yahoo.co.jp/pickup/6601350?source=rss",
+   "time": "22:08"
+  },
+  {
+   "cat": "エンタメ",
    "title": "日テレ忽滑谷こころアナ 休職発表",
-   "link": "https://news.yahoo.co.jp/pickup/6601339?source=rss"
+   "link": "https://news.yahoo.co.jp/pickup/6601339?source=rss",
+   "time": "20:11"
+  },
+  {
+   "cat": "スポーツ",
+   "title": "塩貝健人 因縁ブラジル戦で招集外",
+   "link": "https://news.yahoo.co.jp/pickup/6601360?source=rss",
+   "time": "22:59"
+  },
+  {
+   "cat": "スポーツ",
+   "title": "森保監督 アジア杯の延期に言及",
+   "link": "https://news.yahoo.co.jp/pickup/6601303?source=rss",
+   "time": "15:35"
+  },
+  {
+   "cat": "スポーツ",
+   "title": "本多灯に連盟処分 ロス五輪絶望的",
+   "link": "https://news.yahoo.co.jp/pickup/6601341?source=rss",
+   "time": "20:34"
+  },
+  {
+   "cat": "IT",
+   "title": "e-Taxに不審な通信 緊急メンテ",
+   "link": "https://news.yahoo.co.jp/pickup/6601361?source=rss",
+   "time": "23:08"
+  },
+  {
+   "cat": "IT",
+   "title": "免許証画像漏えい SNS悪用詐欺も",
+   "link": "https://news.yahoo.co.jp/pickup/6601325?source=rss",
+   "time": "19:39"
+  },
+  {
+   "cat": "科学",
+   "title": "養殖カンパチ大量死 26万8000匹",
+   "link": "https://news.yahoo.co.jp/pickup/6601336?source=rss",
+   "time": "19:28"
+  },
+  {
+   "cat": "科学",
+   "title": "日本の探査機 水星を来春初撮影へ",
+   "link": "https://news.yahoo.co.jp/pickup/6601335?source=rss",
+   "time": "19:13"
   }
  ]
 }
