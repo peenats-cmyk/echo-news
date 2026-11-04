@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Echo Dashboard</title>
+<style>
+:root { --fg: #1d2a4d; --card: rgba(29,42,77,.07); --card1: rgba(29,42,77,.15);
+--shade: linear-gradient(90deg, rgba(255,255,255,.80) 0%, rgba(255,255,255,.55) 65%, rgba(255,255,255,.25) 100%);
+--bgbase: linear-gradient(160deg, #fbfaf6 0%, #f1f3f8 60%, #e9edf6 100%); --shadow: rgba(40,50,90,.25); }
+body.night { --fg: #ffffff; --card: rgba(255,255,255,.09); --card1: rgba(255,255,255,.2);
+--shade: linear-gradient(90deg, rgba(5,10,25,.72) 0%, rgba(5,10,25,.45) 60%, rgba(5,10,25,.2) 100%);
+--bgbase: radial-gradient(ellipse at 80% 20%, #2a3a6e 0%, rgba(42,58,110,0) 55%), linear-gradient(160deg, #14203f 0%, #0b1226 60%, #1a1030 100%); --shadow: rgba(0,0,0,.45); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #f4f4f1; }
+body.night, body.night html { background: #0b1226; }
+#stage { position: absolute; left: 0; top: 0; width: 960px; height: 480px; transform-origin: 0 0;
+font-family: "Noto Sans CJK JP", "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif; color: var(--fg);
+background: url("background.jpg") center / cover no-repeat, var(--bgbase); }
+#shade { position: absolute; inset: 0; background: var(--shade); }
+.abs { position: absolute; }
+#greet { left: 34px; top: 30px; font-size: 20px; opacity: .85; }
+#clock { left: 28px; top: 52px; font-size: 118px; font-weight: 700; letter-spacing: 0; line-height: 1; font-variant-numeric: tabular-nums; }
+#date { left: 34px; top: 190px; font-size: 24px; opacity: .9; }
+#wx { left: 380px; top: 34px; width: 300px; }
+#place { font-size: 18px; opacity: .8; }
+#now { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 6px; }
+#icon { font-size: 56px; line-height: 1; }
+#temp { font-size: 70px; font-weight: 700; line-height: 1; }
+#desc { font-size: 21px; line-height: 1.25; flex-basis: 100%; }
+#sub { margin-top: 4px; font-size: 18px; opacity: .9; }
+#news { left: 34px; top: 322px; width: 580px; font-size: 18px; line-height: 1.38; }
+#news .h { font-size: 15px; opacity: .7; margin-bottom: 2px; }
+#news .ev { display: flex; gap: 10px; white-space: nowrap; }
+#news .ev .dt { width: 92px; font-weight: 700; }
+#news .ev .vn { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+#news .ev .cd { width: 64px; text-align: right; opacity: .85; }
+#xpanel { left: 24px; top: 226px; width: 590px; height: 246px; border-radius: 12px; overflow: hidden; background: var(--card); display: none; padding: 8px 14px; box-sizing: border-box; }
+#xpanel .nhead { font-size: 16px; font-weight: 700; display: flex; justify-content: space-between; margin-bottom: 2px; }
+#xpanel .nhead span { font-weight: 400; opacity: .6; font-size: 13px; }
+#xpanel .frow { display: flex; align-items: center; border-top: 1px solid rgba(128,128,128,.25); height: 49px; box-sizing: border-box; }
+#xpanel .frow .fn { width: 112px; font-size: 18px; font-weight: 700; flex: none; }
+#xpanel .frow .fv { width: 92px; font-size: 20px; font-weight: 700; flex: none; text-align: right; font-variant-numeric: tabular-nums; }
+#xpanel .frow .fc { flex: 1; text-align: right; font-size: 15px; font-weight: 600; line-height: 1.15; font-variant-numeric: tabular-nums; }
+#xpanel .frow .fc small { display: block; font-size: 11px; font-weight: 400; opacity: .6; }
+#xpanel .up { color: #d9363e; } #xpanel .dn { color: #1d6fd8; }
+#xpanel .fh { display: flex; font-size: 11px; opacity: .55; padding-left: 112px; }
+#xpanel .fh span:nth-child(1) { width: 92px; text-align: right; } #xpanel .fh span:nth-child(n+2) { flex: 1; text-align: right; }
+#char { right: 6px; top: 22px; height: 450px; filter: drop-shadow(0 4px 12px var(--shadow)); }
+#status { right: 20px; bottom: 26px; font-size: 12px; opacity: .6; text-align: right; }
+#credit { right: 20px; bottom: 8px; font-size: 12px; opacity: .55; }
+#np { left: 24px; top: 226px; width: 590px; height: 88px; border-radius: 12px; background: var(--card); padding: 9px 12px; display: flex; align-items: center; gap: 12px; overflow: hidden; }
+#np .art { width: 68px; height: 68px; border-radius: 8px; background: var(--card1); flex: none; object-fit: cover; display: none; }
+#np .txt { flex: 1; min-width: 0; }
+#np .ti { font-size: 23px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.25; }
+#np .ar { font-size: 17px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+#np .ms { font-size: 12px; opacity: .6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+#np .bar { height: 3px; background: var(--card1); border-radius: 2px; margin-top: 5px; }
+#np .bar i { display: block; height: 3px; width: 0; background: #1db954; border-radius: 2px; }
+.btn { flex: none; width: 54px; height: 54px; border-radius: 27px; border: 0; background: var(--card1); color: var(--fg); font-size: 26px; line-height: 54px; text-align: center; cursor: pointer; }
+.btn.on { background: #d9363e; color: #fff; }
+.btn.sm { width: 38px; height: 38px; border-radius: 19px; font-size: 18px; line-height: 38px; }
+#cfg { position: absolute; inset: 0; background: rgba(255,255,255,.97); display: none; padding: 30px 40px; font-size: 18px; z-index: 20; }
+#cfg h2 { font-size: 24px; margin-bottom: 10px; }
+#cfg input { width: 100%; font-size: 20px; padding: 6px 8px; margin: 4px 0 10px; border: 1px solid #889; border-radius: 6px; }
+#cfg code { font-size: 15px; background: #eef; padding: 2px 6px; border-radius: 4px; word-break: break-all; }
+#cfg button { font-size: 20px; padding: 8px 18px; margin: 6px 10px 0 0; border-radius: 8px; border: 1px solid #556; background: #fff; color: #1d2a4d; }
+#cfg p { margin: 6px 0; line-height: 1.4; }
+</style>
+</head>
+<body>
+<div id="stage">
+<div id="shade"></div>
+<div id="greet" class="abs"></div>
+<div id="clock" class="abs">--:--</div>
+<div id="date" class="abs"></div>
+<div id="wx" class="abs">
+<div id="place">📍 いわき市</div>
+<div id="now">
+<div id="icon">…</div>
+<div id="temp">--°</div>
+<div id="desc"></div>
+</div>
+<div id="sub"></div>
+</div>
+<img id="char" class="abs" alt="" style="display:none">
+<div id="np" class="abs">
+<img class="art" id="npArt" alt="">
+<div class="txt"><div class="ti" id="npTi">♪ 再生していません</div><div class="ar" id="npAr"></div><div class="ms" id="npMs"></div><div class="bar"><i id="npBar"></i></div></div>
+<div class="btn" id="mic" title="音声操作">🎤</div>
+<div class="btn sm" id="gear" title="設定">⚙</div>
+</div>
+<div id="news" class="abs"></div>
+<div id="xpanel" class="abs"></div>
+<div id="credit" class="abs">天気: Open-Meteo ツアー: aiko official website 音楽: Spotify</div>
+<div id="status" class="abs"></div>
+<div id="cfg">
+<h2>Spotify の設定</h2>
+<p>Client ID(Spotify for Developers で作成したアプリのもの)</p>
+<input id="cfgId" type="text" autocomplete="off" spellcheck="false">
+<p>Redirect URI に次を登録してください:<br><code id="cfgRu"></code></p>
+<p id="cfgSt"></p>
+<button id="cfgGo">Spotify に接続</button><button id="cfgOut">接続を解除</button><button id="cfgClose">閉じる</button>
+</div>
+</div>
+<script src="cutout.js" onerror="void 0"></script>
+<script>
+var CONFIG = {
+lat: 37.0505, lon: 140.8877, nightDark: false, weatherRefreshMin: 15,
+fundsJsonUrl: "https://peenats-cmyk.github.io/echo-news/funds.json",
+viewSec: 0, debug: false,
+tourTitle: "aiko Live Tour「Love Like Pop vol.26」", tourCount: 5,
+events: [
+{ d: "2026-11-14", venue: "横浜アリーナ", time: "17:30" },
+{ d: "2026-11-15", venue: "横浜アリーナ", time: "17:30" },
+{ d: "2026-12-02", venue: "日本ガイシホール", time: "18:30" },
+{ d: "2026-12-03", venue: "日本ガイシホール", time: "18:30" },
+{ d: "2026-12-31", venue: "大阪城ホール(カウントダウン)", time: "22:00" },
+{ d: "2027-01-09", venue: "Asueアリーナ大阪", time: "17:30" },
+{ d: "2027-01-10", venue: "Asueアリーナ大阪", time: "17:30" },
+{ d: "2027-01-29", venue: "日本武道館", time: "18:30" },
+{ d: "2027-01-30", venue: "日本武道館", time: "17:30" },
+{ d: "2027-02-17", venue: "日本武道館(追加)", time: "18:30" },
+{ d: "2027-02-18", venue: "日本武道館(追加)", time: "18:30" }
+]
+};
+function fit() {
+var s = Math.min(window.innerWidth / 960, window.innerHeight / 480);
+var st = document.getElementById("stage");
+st.style.transform = "scale(" + s + ")";
+st.style.left = Math.max(0, (window.innerWidth - 960 * s) / 2) + "px";
+st.style.top = Math.max(0, (window.innerHeight - 480 * s) / 2) + "px";
+}
+window.addEventListener("resize", fit);
+fit();
+function $(id) { return document.getElementById(id); }
+var ST = { x: "", w: "" };
+function showStatus() { if (!CONFIG.debug) return; $("status").textContent = [ST.w, ST.x].filter(Boolean).join(" "); }
+function pad(n) { return n < 10 ? "0" + n : "" + n; }
+var DAYS = ["日", "月", "火", "水", "木", "金", "土"];
+function tick() {
+var d = new Date();
+var h = d.getHours();
+$("clock").textContent = pad(h) + ":" + pad(d.getMinutes());
+$("date").textContent = (d.getMonth() + 1) + "月" + d.getDate() + "日" + DAYS[d.getDay()] + "曜日";
+document.body.classList.toggle("night", CONFIG.nightDark && (h >= 22 || h < 6));
+$("greet").textContent = h < 5 ? "夜更かしですね" : h < 11 ? "おはようございます" : h < 17 ? "こんにちは" : h < 22 ? "こんばんは" : "おやすみなさい";
+}
+tick();
+setInterval(tick, 1000);
+function wmo(code, isDay) {
+if (code === 0) return [isDay ? "☀️" : "🌙", "快晴"];
+if (code === 1) return [isDay ? "🌤️" : "🌙", "晴れ"];
+if (code === 2) return ["⛅", "晴れ時々くもり"];
+if (code === 3) return ["☁️", "くもり"];
+if (code === 45 || code === 48) return ["🌫️", "霧"];
+if (code >= 51 && code <= 57) return ["🌦️", "霧雨"];
+if (code >= 61 && code <= 67) return ["🌧️", "雨"];
+if (code >= 71 && code <= 77) return ["🌨️", "雪"];
+if (code >= 80 && code <= 82) return ["🌦️", "にわか雨"];
+if (code === 85 || code === 86) return ["🌨️", "にわか雪"];
+if (code >= 95) return ["⛈️", "雷雨"];
+return ["❓", ""];
+}
+function loadWeather() {
+var url = "https://api.open-meteo.com/v1/forecast?latitude=" + CONFIG.lat + "&longitude=" + CONFIG.lon +
+"&current=temperature_2m,relative_humidity_2m,weather_code,is_day" +
+"&daily=temperature_2m_max,temperature_2m_min" +
+"&timezone=Asia%2FTokyo&forecast_days=2";
+fetch(url).then(function (r) { return r.json(); }).then(function (j) {
+var c = j.current;
+var w = wmo(c.weather_code, c.is_day);
+$("icon").textContent = w[0];
+$("temp").textContent = Math.round(c.temperature_2m) + "°";
+$("desc").textContent = w[1];
+$("sub").textContent = "↑" + Math.round(j.daily.temperature_2m_max[0]) + "° ↓" +
+Math.round(j.daily.temperature_2m_min[0]) + "° 湿度 " + c.relative_humidity_2m + "%";
+}).catch(function (e) {
+$("desc").textContent = "天気を取得できません";
+ST.w = "[天気:失敗]"; showStatus();
+});
+}
+loadWeather();
+setInterval(loadWeather, CONFIG.weatherRefreshMin * 60 * 1000);
+function renderEvents() {
+var now = new Date();
+var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+var list = [];
+for (var i = 0; i < CONFIG.events.length; i++) {
+var e = CONFIG.events[i], p = e.d.split("-");
+var dt = new Date(+p[0], +p[1] - 1, +p[2]);
+var diff = Math.round((dt.getTime() - today.getTime()) / 86400000);
+if (diff >= 0) list.push({ dt: dt, diff: diff, e: e });
+}
+if (!list.length) { $("news").innerHTML = ""; return; }
+var html = '<div class="h">● ' + CONFIG.tourTitle.replace(/</g, "&lt;") + '</div>';
+for (var k = 0; k < Math.min(CONFIG.tourCount, list.length); k++) {
+var it = list[k], d = it.dt;
+var cd = it.diff === 0 ? "今日!" : "あと" + it.diff + "日";
+html += '<div class="ev"><span class="dt">' + (d.getMonth() + 1) + "/" + d.getDate() + "(" + DAYS[d.getDay()] + ")" +
+'</span><span class="vn">' + it.e.venue + " " + it.e.time + '開演</span><span class="cd">' + cd + "</span></div>";
+}
+$("news").innerHTML = html;
+}
+renderEvents();
+setInterval(renderEvents, 10 * 60 * 1000);
+var viewBack = null, xOk = false, xShown = false, xTimer = null;
+function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function fmtSigned(v, d) { var t = Math.abs(v).toFixed(d || 0).replace(/\B(?=(\d{3})+(?!\d))/g, ","); return (v > 0 ? "+" : v < 0 ? "-" : "") + t; }
+function renderFunds(d) {
+var h = '<div class="nhead">投資信託 基準価額<span>' + esc(d.updated || "") + ' 更新</span></div><div class="fh"><span>基準価額</span><span>前日比</span><span>前月比</span><span>前年比</span></div>';
+(d.items || []).forEach(function (it) {
+var dc = it.diff > 0 ? "up" : it.diff < 0 ? "dn" : "";
+var mc = it.mom == null ? "" : it.mom > 0 ? "up" : it.mom < 0 ? "dn" : "";
+h += '<div class="frow"><div class="fn">' + esc(it.name) + '</div><div class="fv">' + String(it.nav).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>' +
+'<div class="fc ' + dc + '">' + fmtSigned(it.diff) + '<small>' + fmtSigned(it.pct, 2) + '% ' + esc(it.date || "") + '</small></div>' +
+'<div class="fc ' + mc + '">' + (it.mom == null ? "―" : fmtSigned(it.mom, 2) + '%') + '<small>' + (it.momRef ? esc(it.momRef) + '比' : '') + '</small></div>' +
+'<div class="fc ' + (it.yoy == null ? "" : it.yoy > 0 ? "up" : it.yoy < 0 ? "dn" : "") + '">' + (it.yoy == null ? "―" : fmtSigned(it.yoy, 2) + '%') + '<small>' + (it.yoyRef ? esc(it.yoyRef) + '時点' : '') + '</small></div></div>';
+});
+$("xpanel").innerHTML = h;
+}
+function loadFunds() {
+if (!CONFIG.fundsJsonUrl) return;
+fetch(CONFIG.fundsJsonUrl + "?t=" + Date.now(), { cache: "no-store" })
+.then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+.then(function (d) {
+if (!(d.items || []).length) throw new Error("empty");
+renderFunds(d);
+xOk = true; ST.x = "[投信:OK]"; showStatus();
+})
+.catch(function (e) { ST.x = "[投信:失敗 " + String(e.message).slice(0, 60) + "]"; showStatus(); });
+}
+function setView(showX) {
+xShown = showX;
+$("np").style.display = showX ? "none" : "flex";
+if (viewBack) clearTimeout(viewBack);
+if (showX) viewBack = setTimeout(function () { setView(false); }, 30000);
+$("news").style.display = showX ? "none" : "block";
+$("xpanel").style.display = showX ? "block" : "none";
+}
+function toggleView() {
+if (!xOk) return;
+setView(!xShown);
+}
+function startRotate() {
+if (xTimer) clearInterval(xTimer);
+if (CONFIG.viewSec > 0) xTimer = setInterval(toggleView, CONFIG.viewSec * 1000);
+}
+loadFunds();
+setInterval(loadFunds, 30 * 60 * 1000);
+startRotate();
+if (window.CUTOUT) { var ch = $("char"); ch.src = window.CUTOUT; ch.style.display = ""; }
+var SP = { id: "", tok: "", ref: "", exp: 0, dev: "", playing: false, last: null };
+var REDIRECT = location.origin + location.pathname;
+var SCOPES = "user-read-playback-state user-modify-playback-state user-read-currently-playing";
+function lsGet(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
+function lsSet(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+SP.id = lsGet("sp_id"); SP.tok = lsGet("sp_tok"); SP.ref = lsGet("sp_ref"); SP.exp = +lsGet("sp_exp") || 0; SP.dev = lsGet("sp_dev");
+function b64url(buf) { var s = ""; new Uint8Array(buf).forEach(function (b) { s += String.fromCharCode(b); }); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+function rnd(n) { var a = new Uint8Array(n); crypto.getRandomValues(a); var s = ""; for (var i = 0; i < n; i++) s += "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"[a[i] % 66]; return s; }
+function tokenPost(params) {
+var body = Object.keys(params).map(function (k) { return k + "=" + encodeURIComponent(params[k]); }).join("&");
+return fetch("https://accounts.spotify.com/api/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body })
+.then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error_description || j.error || r.status); return j; }); });
+}
+function saveTok(j) {
+SP.tok = j.access_token; SP.exp = Date.now() + (j.expires_in - 60) * 1000;
+if (j.refresh_token) SP.ref = j.refresh_token;
+lsSet("sp_tok", SP.tok); lsSet("sp_exp", String(SP.exp)); lsSet("sp_ref", SP.ref);
+}
+function startAuth() {
+var id = $("cfgId").value.trim();
+if (!id) { $("cfgSt").textContent = "Client ID を入力してください"; return; }
+lsSet("sp_id", id); SP.id = id;
+var ver = rnd(96), st = rnd(16);
+lsSet("sp_ver", ver); lsSet("sp_state", st);
+crypto.subtle.digest("SHA-256", new TextEncoder().encode(ver)).then(function (h) {
+location.href = "https://accounts.spotify.com/authorize?response_type=code&client_id=" + encodeURIComponent(id) +
+"&scope=" + encodeURIComponent(SCOPES) + "&redirect_uri=" + encodeURIComponent(REDIRECT) +
+"&code_challenge_method=S256&code_challenge=" + b64url(h) + "&state=" + st;
+});
+}
+function handleRedirect() {
+var q = new URLSearchParams(location.search);
+if (!q.get("code") && !q.get("error")) return Promise.resolve();
+var code = q.get("code"), err = q.get("error"), st = q.get("state");
+history.replaceState(null, "", REDIRECT);
+if (err || st !== lsGet("sp_state")) { npMsg("Spotify 接続エラー: " + (err || "state")); return Promise.resolve(); }
+return tokenPost({ grant_type: "authorization_code", code: code, redirect_uri: REDIRECT, client_id: SP.id, code_verifier: lsGet("sp_ver") })
+.then(saveTok).catch(function (e) { npMsg("Spotify 接続エラー: " + e.message); });
+}
+function ensureTok() {
+if (!SP.ref && !SP.tok) return Promise.reject(new Error("未接続"));
+if (SP.tok && Date.now() < SP.exp) return Promise.resolve(SP.tok);
+return tokenPost({ grant_type: "refresh_token", refresh_token: SP.ref, client_id: SP.id }).then(function (j) { saveTok(j); return SP.tok; });
+}
+function api(method, path, body) {
+return ensureTok().then(function (t) {
+return fetch("https://api.spotify.com/v1" + path, { method: method, headers: { Authorization: "Bearer " + t, "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+}).then(function (r) {
+if (r.status === 204 || r.status === 202) return null;
+return r.text().then(function (tx) {
+var j = null; try { j = tx ? JSON.parse(tx) : null; } catch (e) {}
+if (!r.ok) { var m = (j && j.error && j.error.message) || ("HTTP " + r.status); var er = new Error(m); er.status = r.status; throw er; }
+return j;
+});
+});
+}
+function npMsg(t) { $("npMs").textContent = t; }
+function connected() { return !!(SP.ref || SP.tok); }
+function renderNP(j) {
+var it = j && j.item; if (it) SP.last = it;
+SP.playing = !!(j && j.is_playing);
+if (!it) { $("npTi").textContent = "♪ 再生していません"; $("npAr").textContent = connected() ? "「スポティファイ、〇〇をかけて」と話しかけてください" : "⚙ で Spotify に接続してください"; $("npArt").style.display = "none"; $("npBar").style.width = "0"; return; }
+var names = (it.artists || it.show && [it.show.publisher] || []).map(function (a) { return typeof a === "string" ? a : a.name; }).join(", ");
+$("npTi").textContent = (SP.playing ? "♪ " : "⏸ ") + it.name;
+$("npAr").textContent = names;
+var im = (it.album && it.album.images) || [];
+if (im.length) { $("npArt").src = im[im.length > 1 ? 1 : 0].url; $("npArt").style.display = "block"; } else $("npArt").style.display = "none";
+$("npBar").style.width = it.duration_ms ? Math.min(100, (j.progress_ms || 0) / it.duration_ms * 100) + "%" : "0";
+}
+var pollBusy = false;
+function poll() {
+if (!connected() || pollBusy) return;
+pollBusy = true;
+api("GET", "/me/player?additional_types=track,episode").then(function (j) {
+renderNP(j);
+if (j && j.device) { SP.dev = j.device.id; lsSet("sp_dev", SP.dev); npMsg(j.device.name + (j.device.volume_percent != null ? " 音量 " + j.device.volume_percent + "%" : "")); }
+else if (!j) npMsg("再生デバイスなし(Spotify アプリを起動してください)");
+}).catch(function (e) {
+if (e.status === 401 || /refresh|invalid_grant|revoked/i.test(e.message)) { npMsg("再接続が必要です(⚙)"); }
+else npMsg("取得失敗: " + e.message.slice(0, 40));
+}).then(function () { pollBusy = false; });
+}
+setInterval(poll, 5000);
+function ensureDevice() {
+return api("GET", "/me/player/devices").then(function (j) {
+var ds = (j && j.devices) || [];
+if (!ds.length) throw new Error("Spotify アプリが見つかりません。アプリを開いてください");
+var cur = ds.filter(function (d) { return d.is_active; })[0];
+var pick = cur || ds.filter(function (d) { return d.id === SP.dev; })[0] ||
+ds.filter(function (d) { return /echo|amazon|checkers/i.test(d.name); })[0] || ds[0];
+SP.dev = pick.id; lsSet("sp_dev", SP.dev);
+if (cur) return pick.id;
+return api("PUT", "/me/player", { device_ids: [pick.id], play: false }).then(function () { return new Promise(function (r) { setTimeout(function () { r(pick.id); }, 800); }); });
+});
+}
+function withDev(fn) {
+return ensureDevice().then(fn).then(function () { setTimeout(poll, 900); });
+}
+function doPlayUri(body) { return withDev(function (id) { return api("PUT", "/me/player/play?device_id=" + id, body); }); }
+function searchPlay(q) {
+return api("GET", "/search?q=" + encodeURIComponent(q) + "&type=artist,track,playlist&limit=5&market=JP").then(function (j) {
+var n = function (s) { return String(s || "").toLowerCase().replace(/[\s　・\-_!！?？]/g, ""); };
+var nq = n(q);
+var ar = ((j.artists && j.artists.items) || []).filter(Boolean)[0];
+var tr = ((j.tracks && j.tracks.items) || []).filter(Boolean)[0];
+var pl = ((j.playlists && j.playlists.items) || []).filter(Boolean)[0];
+if (ar && (nq === n(ar.name) || nq.indexOf(n(ar.name)) === 0 && !tr)) { npMsg("アーティスト: " + ar.name); return doPlayUri({ context_uri: ar.uri }); }
+if (tr) { npMsg("曲: " + tr.name); return doPlayUri({ uris: [tr.uri] }); }
+if (ar) return doPlayUri({ context_uri: ar.uri });
+if (pl) return doPlayUri({ context_uri: pl.uri });
+throw new Error("「" + q + "」が見つかりません");
+});
+}
+function hira(s) { return s.replace(/[\s　、。,.!！?？]/g, ""); }
+function handleCommand(text) {
+var t = hira(text);
+t = t.replace(/^(ねえ|ねぇ|ヘイ|へい|OK|オーケー)?(スポティファイ|スポチファイ|すぽてぃふぁい|スポティ|Spotify|spotify)で?/i, "");
+if (!t) return "ご用件をどうぞ";
+var m;
+if (/(一時停止|止めて|とめて|ストップ|停止|ポーズ|静かに)/.test(t)) return run("停止", function () { return api("PUT", "/me/player/pause"); });
+if (/^(次|つぎ|スキップ|次の曲|次へ|ネクスト)/.test(t)) return run("次の曲", function () { return withDev(function () { return api("POST", "/me/player/next"); }); });
+if (/^(前の曲|前に戻|戻って|前へ|ひとつ前|一つ前)/.test(t)) return run("前の曲", function () { return withDev(function () { return api("POST", "/me/player/previous"); }); });
+if (/^(再生|再開|続き|つづき|プレイ|流して|かけて)$/.test(t)) return run("再生", function () { return withDev(function (id) { return api("PUT", "/me/player/play?device_id=" + id); }); });
+if ((m = t.match(/音量(?:を)?(\d{1,3})/))) { var v = Math.min(100, +m[1]); return run("音量 " + v + "%", function () { return api("PUT", "/me/player/volume?volume_percent=" + v); }); }
+if (/(音量|ボリューム).*(上げ|あげ|大き)|大きく|うるさくない/.test(t) && !/下げ|小さ/.test(t)) return run("音量 +", function () { return volStep(15); });
+if (/(音量|ボリューム).*(下げ|さげ|小さ)|小さく|静かめ/.test(t)) return run("音量 -", function () { return volStep(-15); });
+m = t.match(/^(.+?)(?:を|の曲を?|の音楽を?)?(?:かけて|流して|再生して|聞かせて|聴かせて|プレイして|おねがい|お願い|かけてください)$/);
+var q = m ? m[1] : (/^(.{2,})$/.test(t) ? t : "");
+if (q) return run("検索: " + q, function () { return searchPlay(q); });
+return "分かりませんでした";
+}
+function volStep(d) {
+return api("GET", "/me/player").then(function (j) {
+var cur = j && j.device && j.device.volume_percent != null ? j.device.volume_percent : 50;
+return api("PUT", "/me/player/volume?volume_percent=" + Math.max(0, Math.min(100, cur + d)));
+});
+}
+function run(label, fn) {
+if (!connected()) return "⚙ から Spotify に接続してください";
+npMsg("🎤 " + label + " …");
+fn().then(function () { npMsg("🎤 " + label + " 完了"); setTimeout(poll, 1200); })
+.catch(function (e) { npMsg("失敗: " + e.message.slice(0, 60)); });
+return label;
+}
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+var rec = null, listening = false, always = false, lastStart = 0;
+function micUI() { $("mic").className = "btn" + (listening ? " on" : ""); }
+function startRec(auto) {
+if (!SR) { npMsg("この端末のブラウザは音声認識に未対応です"); return; }
+if (rec) { try { rec.abort(); } catch (e) {} }
+rec = new SR(); rec.lang = "ja-JP"; rec.interimResults = false; rec.maxAlternatives = 1; rec.continuous = false;
+rec.onstart = function () { listening = true; micUI(); if (!auto) npMsg("🎤 聞いています…"); };
+rec.onresult = function (ev) {
+var tx = ev.results[ev.results.length - 1][0].transcript;
+if (always) {
+if (!/(スポティ|スポチ|Spotify|spotify|すぽてぃ)/i.test(tx)) return;
+}
+npMsg("🎤「" + tx + "」→ " + handleCommand(tx));
+};
+rec.onerror = function (ev) {
+if (ev.error === "not-allowed" || ev.error === "service-not-allowed") { always = false; npMsg("マイクが許可されていません(アドレスバーの設定から許可)"); }
+else if (ev.error === "network") { always = false; npMsg("音声認識サービスに接続できません"); }
+else if (ev.error !== "no-speech" && ev.error !== "aborted") npMsg("音声認識エラー: " + ev.error);
+};
+rec.onend = function () {
+listening = false; micUI();
+if (always) { var w = Math.max(0, 600 - (Date.now() - lastStart)); setTimeout(function () { if (always) { lastStart = Date.now(); startRec(true); } }, w); }
+};
+lastStart = Date.now();
+try { rec.start(); } catch (e) { npMsg("音声認識を開始できません: " + e.message); }
+}
+var micTimer = null, micLong = false;
+$("mic").addEventListener("touchstart", function () { micLong = false; micTimer = setTimeout(function () { micLong = true; always = !always; if (always) { startRec(false); npMsg("🎤 常時待機オン:「スポティファイ、〇〇をかけて」"); } else { try { rec.abort(); } catch (e) {} npMsg("常時待機オフ"); } }, 600); }, { passive: true });
+$("mic").addEventListener("touchend", function () { clearTimeout(micTimer); });
+$("mic").addEventListener("click", function (e) {
+e.stopPropagation();
+if (micLong) { micLong = false; return; }
+always = false;
+if (listening) { try { rec.abort(); } catch (x) {} return; }
+startRec(false);
+});
+function openCfg() {
+$("cfgId").value = SP.id; $("cfgRu").textContent = REDIRECT;
+$("cfgSt").textContent = connected() ? "接続済みです。" : "未接続です。";
+$("cfg").style.display = "block";
+}
+$("gear").addEventListener("click", function (e) { e.stopPropagation(); openCfg(); });
+$("cfgClose").addEventListener("click", function (e) { e.stopPropagation(); $("cfg").style.display = "none"; });
+$("cfgGo").addEventListener("click", function (e) { e.stopPropagation(); startAuth(); });
+$("cfgOut").addEventListener("click", function (e) { e.stopPropagation(); ["sp_tok", "sp_ref", "sp_exp"].forEach(function (k) { lsSet(k, null); }); SP.tok = SP.ref = ""; SP.exp = 0; renderNP(null); $("cfgSt").textContent = "解除しました。"; });
+$("cfg").addEventListener("click", function (e) { e.stopPropagation(); });
+$("np").addEventListener("click", function (e) { e.stopPropagation(); if (!connected()) openCfg(); else if (SP.playing || SP.last) { api("PUT", SP.playing ? "/me/player/pause" : "/me/player/play").then(function () { setTimeout(poll, 800); }).catch(function () {}); } });
+renderNP(null);
+handleRedirect().then(function () { if (connected()) { renderNP(null); poll(); } });
+function goFullscreen() {
+try {
+var de = document.documentElement;
+var req = de.requestFullscreen || de.webkitRequestFullscreen;
+if (!document.fullscreenElement && !document.webkitFullscreenElement && req) req.call(de);
+} catch (e) {}
+}
+$("stage").addEventListener("click", function () {
+goFullscreen();
+toggleView(); startRotate();
+});
+document.body.addEventListener("click", goFullscreen);
+function keepAwake() {
+try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (e) {}
+}
+keepAwake();
+document.addEventListener("visibilitychange", function () { if (!document.hidden) keepAwake(); });
+</script>
+</body>
+</html>
